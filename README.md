@@ -1,304 +1,70 @@
-<h1><p align="center"> MPHF<br>Minimal Perfect Hash Functions for the Web</p></h1>
+# MPHF - *Coordinate System*
+**Part of the Kireji Project**
+> *One's nature is one's distance from zero.*
+## Overview
+**MPHF** (Minimal Perfect Hash Function) provides the bijective coordinate system at the heart of the Kireji Project.
+It guarantees that every valid state of an app or component corresponds to a unique integer coordinate, with **no collisions, no duplicates, and no gaps**.
+The Kireji Web Framework uses these coordinates to encode application state directly in the URL, making navigation, persistence, and cross-origin traversal deterministic and lossless.
+## The Kireji Project
+The Kireji Project poses a question: **What if we could treat all functional software as points in a single, mathematically mapped, and traversable space?**
+| Repo | Purpose
+| ---- | -------
+| **MPHF** | **Coordinate System - ★ You are here<br><sub>Provides the bijective coordinate system</sub>**
+| [Kireji](https://github.com/kireji-app/kireji#readme) | [Web Framework<br><sub>Uses MPHF to encode app state in URLs and manage cross-origin traversal</sub>](https://github.com/kireji-app/kireji#readme)
+| [Demo](https://github.com/kireji-app/demo#readme) | [App Ecosystem<br><sub>Demonstrates practical applications of the Kireji Project</sub>](https://github.com/kireji-app/demo#readme)
+## Implementation
+A *minimal perfect hash* defines a bijection between a configuration space `S` and an integer range `[0, |S| - 1]`.
+This allows us to treat each possible configuration of an application as a **point** on a **discrete manifold**.
 
-This project is a small library that takes a model structure and creates a minimal perfect hash function over every possible model state.
+The hash of a structure is determined by positional offsets within its combinatorial space.
+For example, if a tuple is composed of sets `A` and `B`, each with domains of size `|A|` and `|B|`, then:
+$$\text{hash}(A=a, B=b) = a \times |B| + b$$
+This generalizes recursively to arbitrary combinations of nested spaces, each component yielding a minimal perfect hash function over the set of valid configurations of its state space.
+### Types
+Configuration spaces are assembled from components that come in three main types.
 
-MPHF creates hierarchical structures such that every element acts as its own independant MPHF.
-
-Every MPHF node can take an instance of its corresponding data model and output either an `bigint` integer or a URL-safe base64 hash string.
-
-Likewise, it can take any hash or `bigint` within the MPHF's domain and output the corresponding data model instance.
-
-```js
-myModel.hash({
- top: "tank-top",
- bottom: "shorts",
- shoes: {
-  color: "magenta",
-  "elastic-laces": "no",
-  "lace-color": "red"
- },
- socks: "mid-calf"
-})
-// Output: "6Z"
-
-myModel.unhash("6Z")
-/* Output:
-{
- top: 'tank-top',
- bottom: 'shorts',
- shoes: { color: 'magenta', 'elastic-laces': 'no', 'lace-color': 'red' },
- socks: 'mid-calf'
-}
-*/
-```
-
-## Entropy-Perfect Encoding
-
-Every possible model state is assigned a BigInt value and a unique variable-length base64 hash, derived from a bijective minimal perfect hash function. This makes hashes as compact and expressive as is mathematically possible; it achieves the information-theoretic lower bound for storing a an instance of the data model.
-
-MPHF provides a compression solution that is uniquely built for a given data model and safely hashes and unhashes every state in that model.
-
-All MPHF hashes are inherently integers (implemented using the `bigint` primative in JavaScript). Because the hash function has no gaps, no duplicates, and no collisions, it is not possible to achieve a smaller lossless hash of a given data model than this.
-
-If there are 10,000,000,000,000,000,000,000,000,000,000,000,000,000,000 possible ways to populate your application's data model, then MPHF produces a hash integer that is always between 0 and 9,999,999,999,999,999,999,999,999,999,999,999,999,999,999. MPHF can then instantly hash any instance of the data model and instantly recover one from any integer in that range.
-
-An example use-case of this is embedding rich state information in places with limited space, such as a URL or DNS TXT record, without the syntactical overhead of query parameters,JSON objects, or delimiters.
-
-```
-https://www.ejaugust.com/0.126.13/4lb5kAsH_R0Dv_UHg/
-```
-
-## Installation
-Install MPHF via `npm`:
-```bash
-npm install mphf
-```
-Import MPHF classes in JavaScript:
-```js
-import { Part, Choice, Tuple } from 'mphf'
-```
-OR
-```js
-const { Part, Choice, Tuple } = require('mphf')
-```
-## Usage
-### Parts
-Use the `Part` class to create a single part with no mutability.
+**Part** - Models a single state with no mutability.
 ```js
 const apple = new Part("apple")
+
+console.log(apple.cardinality)
+// 1n
 ```
-
-Part is the base type. It supports one argument, `key`, which is used to uniquely identify the part in its parent domain (see Choice and Tuple, below).
-
-It represents a model element that does not change. As such, it has a cardinality of 1.
+**Match** - Models a choice between two or more options.
 ```js
-console.log(apple.cardinality) // 1n
-```
-This cardinality represents the number of states that the part can be in. All part cardinalities are stored as a BigInt primative.
-
-Part does not have the `hash()` and `unhash()` methods. Instead, it is used to assemble larger models which can then be hashed and unhashed.
-
-All other types in MPHF extend this base type.
-### Choices
-To model a choice between two or more options, use the `Choice` class. It has two arguments: `key` and `subparts`.
-```js
-const apple = new Part("apple")
-const orange = new Part("orange")
-const pear = new Part("pear")
-
-const fruit = new Choice("fruit", [apple, orange, pear])
-
-console.log(fruit.cardinality) // 3n
-console.log(fruit.apple.cardinality) // 1n
-```
-If you provide a string instead of a part instance, a part instance will be created automatically.
-```js
-const fruit = new Choice("fruit", ["apple", "orange", "pear"])
-
-console.log(fruit.cardinality) // 3n
-console.log(fruit.apple instanceof Part) // true
-```
-When there are strings in the `subparts` array, the constructor process mutates the original array to replace each string with a part instance.
-```js
-const array = ["apple", "orange", "pear"]
-console.log(typeof array[0] === 'string') // true
-
-const fruit = new Choice("fruit")
-console.log(typeof array[0] === 'string') // false
-console.log(array[0] instaceof Part) // true
-```
-Each subpart has an index corresponding to its location in the `subpart` array.
-```js
-const fruit = new Choice("fruit", ["apple", "orange", "pear"])
-
-console.log(fruit.apple.index) // 0
-console.log(fruit[1] === fruit.orange) // true
-```
-For any subpart of a `Choice` which has a cardinality of 1, the `hash()` function may be used with its `key` in order to obtain a hash computed from the integer `n` in the range $`0 < n < k`$, where `k` is the cardinality of the `Choice`. Hashes have a variable length. The first hash is the empty string.
-
-```js
-const fruit = new Choice("fruit", ["apple", "orange", "pear"])
-
-console.log(fruit.hash("apple")) // ""
-console.log(fruit.hash("orange")) // "1"
-console.log(fruit.hash("pear")) // "2"
-```
-Likewise, when a given hash selects a subpart with a cardinality of 1, the `unhash()` function returns the corresponding key.
-
-```js
-const fruit = new Choice("fruit", ["apple", "orange", "pear"])
-
-console.log(fruit.unhash("")) // "apple"
-console.log(fruit.unhash("1")) // "orange"
-console.log(fruit.unhash("2")) // "pear"
-```
-An out-of-range hash will throw an error.
-```js
-const fruit = new Choice("fruit", ["apple", "orange", "pear"])
-
-console.log(fruit.unhash("3")) // error
-```
-When a subpart of a `Choice` has a cardinality greater than 1, it means that the given subpart can have model data of its own.
-
-#### Choice Nesting
-In this case, instead of a `key` string, the `hash()` method expects an object with a single key corresponding to a subpart key and a value corresponding to a model which will be passed to the subpart's `hash()` method.
-
-```js
-const fruit = new Choice("fruit", ["apple", "orange", "pear"])
-const vegetable = new Choice("vegetable", ["cabbage", "broccoli", "kale"])
-
-const food = new Choice("snack", [fruit, vegetable])
-
-console.log(food.cardinality) // "6"
-
-console.log(food.hash("apple")) // error
-
-console.log(food.hash({ fruit: "apple" })) // ""
-console.log(food.hash({ vegetable: "kale" })) // "5"
-```
-The same applies to the output of the `unhash()` method.
-
-```js
-const fruit = new Choice("fruit", ["apple", "orange", "pear"])
-const vegetable = new Choice("vegetable", ["cabbage", "broccoli", "kale"])
-
-const food = new Choice("snack", [fruit, vegetable])
-
-console.log(food.unhash("")) // { fruit: "apple" }
-console.log(food.unhash("5")) // { vegetable: "kale" }
-```
-### Tuples
-To define a set of independantly mutable variables, use the `Tuple` class.
-```js
-const outfit = new Tuple("outfit", [
- new Choice("top", [
-  "t-shirt",
-  "button-down",
-  "tank-top"
-  ]),
- new Choice("bottom", [
-  "shorts",
-  "skirt",
-  "pants"
-  ])
+const fruit = new Match("fruit", [
+ apple,
+ "orange",
+ "pear"
 ])
 
-console.log(outfit.cardinality) // 9n
-
-console.log(outfit.hash({
- top: "t-shirt",
- bottom: "shorts"
-}))
-// ""
-
-console.log(outfit.hash({
- top: "button-down",
- bottom: "pants"
-})) // "5"
-
+console.log(fruit.cardinality)
+// 3n
+console.log(fruit.hash("pear"))
+// "2"
+console.log(fruit.unhash("2"))
+// "pear"
 ```
-### Tuple Nesting
-Like `Choice`, a `Tuple` may be nested within a `Choice` or another `Tuple`:
-
+**Mix** - Models a set of independently mutable variables.
 ```js
-const outfit = new Tuple("outfit", [
- new Choice("top", [
-  "t-shirt",
-  "button-down",
-  "tank-top"
- ]),
- new Choice("bottom", [
-  "shorts",
-  "skirt",
-  "pants"
- ]),
- new Tuple("shoes", [
-  new Choice("color", [
-   "magenta",
-   "auburn",
-   "green"
-  ]),
-  new Choice("elastic-laces", [
-   "yes",
-   "no"
-  ]),
-  new Choice("lace-color", [
-   "red",
-   "green",
-   "blue"
-  ])
- ]),
- new Choice("socks", [
-  "tube",
-  "mid-calf",
-  "ankle",
-  "none"
+const snack = new Mix("snack", [
+ fruit,
+ new Match("drink", [
+  "water",
+  "milk",
+  "cola"
  ])
 ])
 
-console.log(outfit.cardinality) // 648n
-
-console.log(outfit.hash({
- top: "tank-top",
- bottom: "shorts",
- shoes: {
-  color: "magenta",
-  "elastic-laces": "no",
-  "lace-color": "red"
- },
- socks: "mid-calf"
-}))
-// 6Z
-
-console.log(outfit.unhash("6Z"))
-/*
-{
- top: 'tank-top',
- bottom: 'shorts',
- shoes: { color: 'magenta', 'elastic-laces': 'no', 'lace-color': 'red' },
- socks: 'mid-calf'
-}
-*/
-
-console.log(outfit.unhash("a7"))
-/*
-{
-  top: 'tank-top',
-  bottom: 'pants',
-  shoes: { color: 'green', 'elastic-laces': 'no', 'lace-color': 'blue' },
-  socks: 'none'
-}
-*/
-
+console.log(snack.cardinality)
+// 9n
+console.log(snack.hash({ fruit: "apple", drink: "water" }))
+// 6
+console.log(snack.unhash("6"))
+// { fruit: "apple", drink: "water" }
 ```
-### Acquiring Integer Hashes
-In addition to string hashes, parts can hash and unhash a BigInt primative value instead, using the `format` argument, whose default value is `"string"`.
-
-```js
-console.log(outfit.hash({
- top: "tank-top",
- bottom: "shorts",
- shoes: {
-  color: "magenta",
-  "elastic-laces": "no",
-  "lace-color": "red"
- },
- socks: "mid-calf"
-}, "bigint"))
-// 445n
-
-console.log(outfit.unhash(513n, "bigint"))
-/*
-{
-  top: 'tank-top',
-  bottom: 'skirt',
-  shoes: { color: 'magenta', 'elastic-laces': 'yes', 'lace-color': 'blue' },
-  socks: 'mid-calf'
-}
-*/
-
-```
-Any bigint can be converted to a variable-length base64 string and back using the methods `Part.encode()` and `Part.decode()`:
+### URL Encoding
+MPHF also includes methods for converting bigints to url-safe base64 strings:
 ```js
 console.log(Part.encode(12345678901234567890n))
 // aJkGoPH7MHi
@@ -306,8 +72,12 @@ console.log(Part.encode(12345678901234567890n))
 console.log(Part.decode('hello-world'))
 // 19857872207319512397n
 ```
+### Tech Stack
+This library is written using **Vanilla JavaScript** with no third-party dependencies.
+### Status and License
+The MPHF Coordinate System is in **Alpha**.\
+The Kireji Project is in **early research and development**.
 
-## Status and License
 [![MPHF on npm](https://img.shields.io/npm/v/mphf?style=for-the-badge&labelColor=CB3837&logo=npm&logoColor=white&label=NPM+package&color=212121)](https://www.npmjs.com/mphf)
 <br>[![Project Status: Alpha](https://img.shields.io/badge/status-alpha-212121?style=for-the-badge&labelColor=181717&logo=github&logoColor=white)](https://www.repostatus.org/#alpha)
 <br>[![Commits](https://img.shields.io/github/commit-activity/t/kireji-app/mphf?style=for-the-badge&labelColor=181717&color=212121&logo=github&logoColor=white)](https://github.com/kireji-app/demo/commits/)
