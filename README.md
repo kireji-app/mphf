@@ -1,36 +1,36 @@
 # MPHF - *Coordinate System*
-**Part of the Kireji Project**
-> *One's nature is one's distance from zero.*
-## Overview
+> **<sub>Part of the Kireji Project</sub>**<br><sup><i>omnia ex una linea</i></sup>
+
 **MPHF** (Minimal Perfect Hash Function) provides the bijective coordinate system at the heart of the Kireji Project.
-It guarantees that every valid state of an app or component corresponds to a unique integer coordinate, with **no collisions, no duplicates, and no gaps**.
+It guarantees that every valid state of an app or component corresponds to a unique integer coordinate, with **no collisions, duplicates, or gaps**.
 The Kireji Web Framework uses these coordinates to encode application state directly in the URL, making navigation, persistence, and cross-origin traversal deterministic and lossless.
 ## The Kireji Project
-The Kireji Project poses a question: **What if we could treat all functional software as points in a single, mathematically mapped, and traversable space?**
+The Kireji Project poses a question: **What if we could treat every web page as a point in a unified, mathematically mapped space?**
+
 | Repo | Purpose
 | ---- | -------
-| **MPHF** | **Coordinate System - ★ You are here<br><sub>Provides the bijective coordinate system</sub>**
-| [Kireji](https://github.com/kireji-app/kireji#readme) | [Web Framework<br><sub>Uses MPHF to encode app state in URLs and manage cross-origin traversal</sub>](https://github.com/kireji-app/kireji#readme)
-| [Demo](https://github.com/kireji-app/demo#readme) | [App Ecosystem<br><sub>Demonstrates practical applications of the Kireji Project</sub>](https://github.com/kireji-app/demo#readme)
+| [MPHF](https://github.com/kireji-app/mphf#readme) | [Coordinate System<br><sup>A bijective coordinate system for hashing structured data</sup>](https://github.com/kireji-app/mphf#readme)
+| **Kireji** | **Web Framework - ★ You are here<br><sup>A reactive web framework with MPHF routing</sup>**
+| [Demo](https://github.com/kireji-app/demo#readme) | [App Ecosystem<br><sup>An example app ecosystem demonstrating the project](https://github.com/kireji-app/demo#readme)</sup>
 ## Implementation
-A *minimal perfect hash* defines a bijection between a configuration space `S` and an integer range `[0, |S| - 1]`.
-This allows us to treat each possible configuration of an application as a **point** on a **discrete manifold**.
+The set of all application states **S** is structured as a **combinatorial configuration space**.
+This allows us to locate every configuration as a **point** on a **discrete manifold**.
+A *minimal perfect hash function* is used to define a bijection between $S$ and the integer range $[0, |S|)$.
 
-The hash of a structure is determined by positional offsets within its combinatorial space.
-For example, if a tuple is composed of sets `A` and `B`, each with domains of size `|A|` and `|B|`, then:
-$$\text{hash}(A=a, B=b) = a \times |B| + b$$
+Each domain is hashed using positional offsets defined by component subdomains with all elements indexed from $0$. For example, a point in the cartesian product space of sets `A` and `B` is assigned a hash using $\text{hash}(A=a, B=b) = a \times |B| + b$.
+
 This generalizes recursively to arbitrary combinations of nested spaces, each component yielding a minimal perfect hash function over the set of valid configurations of its state space.
 ### Types
 Configuration spaces are assembled from components that come in three main types.
 
-**Part** - Models a single state with no mutability.
+The **Part** type models a single state with no mutability.
 ```js
 const apple = new Part("apple")
 
 console.log(apple.cardinality)
 // 1n
 ```
-**Match** - Models a choice between two or more options.
+The **Match** type models a choice between two or more options.
 ```js
 const fruit = new Match("fruit", [
  apple,
@@ -45,7 +45,7 @@ console.log(fruit.hash("pear"))
 console.log(fruit.unhash("2"))
 // "pear"
 ```
-**Mix** - Models a set of independently mutable variables.
+The **Mix** type models a set of independently mutable variables.
 ```js
 const snack = new Mix("snack", [
  fruit,
@@ -64,7 +64,7 @@ console.log(snack.unhash("6"))
 // { fruit: "apple", drink: "water" }
 ```
 ### URL Encoding
-MPHF also includes methods for converting bigints to url-safe base64 strings:
+MPHF also includes methods for encoding large integers as url-safe base64 strings:
 ```js
 console.log(Part.encode(12345678901234567890n))
 // aJkGoPH7MHi
@@ -75,7 +75,8 @@ console.log(Part.decode('hello-world'))
 ### Tech Stack
 This library is written using **Vanilla JavaScript** with no third-party dependencies.
 ### Status and License
-The MPHF Coordinate System is in **Alpha**.\
+The MPHF Coordinate System is in **Alpha**.
+
 The Kireji Project is in **early research and development**.
 
 [![MPHF on npm](https://img.shields.io/npm/v/mphf?style=for-the-badge&labelColor=CB3837&logo=npm&logoColor=white&label=NPM+package&color=212121)](https://www.npmjs.com/mphf)

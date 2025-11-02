@@ -4,7 +4,7 @@ export declare class Part {
  /** Decodes the given hash, returning the corresponding bigint. */
  static decode(hash: string): bigint
  /** The alphabet used for encoding and decoding BigInt values as strings. */
- readonly static radix: string
+ static readonly radix: string
  /** The number of states the model has, used heavily to compute the hashing function across the model configuration space. */
  readonly cardinality: bigint
  /** The path to this part in the model hierarchy. */
@@ -18,10 +18,10 @@ export declare class Part {
  /** An array of the domain's subparts. Not available for simple Part types. */
  readonly subparts?: Part[]
  /** A method which hashes the given model, if it conforms to this part's model. Throws an error, otherwise. */
- hash(model: any, format: "string" = "string"): string
+ hash(model: any, format: "string"): string
  hash(model: any, format: "bigint"): bigint
  /** A method which produces a model instance from the given hash, if the model conforms to this part's model specification. Throws an error, otherwise. */
- unhash(hash: string, format: "string" = "string"): any
+ unhash(hash: string, format: "string"): any
  unhash(hash: bigint, format: "bigint"): any
 }
 
