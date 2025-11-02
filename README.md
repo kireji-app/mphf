@@ -9,8 +9,8 @@ The Kireji Project poses a question: **What if we could treat every web page as 
 
 | Repo | Purpose
 | ---- | -------
-| [MPHF](https://github.com/kireji-app/mphf#readme) | [Coordinate System<br><sup>A bijective coordinate system for hashing structured data</sup>](https://github.com/kireji-app/mphf#readme)
-| **Kireji** | **Web Framework - ★ You are here<br><sup>A reactive web framework with MPHF routing</sup>**
+| **MPHF** | **Coordinate System - ★ You are here<br><sup>A bijective coordinate system for hashing structured data</sup>**
+| [Kireji](https://github.com/kireji-app/kireji#readme) | [Web Framework<br><sup>A reactive web framework with MPHF routing</sup>](https://github.com/kireji-app/kireji#readme)
 | [Demo](https://github.com/kireji-app/demo#readme) | [App Ecosystem<br><sup>An example app ecosystem demonstrating the project](https://github.com/kireji-app/demo#readme)</sup>
 ## Implementation
 The set of all application states **S** is structured as a **combinatorial configuration space**.
