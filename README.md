@@ -11,7 +11,7 @@ The Kireji Project poses a question: **What if we could treat every web page as 
 | ---- | -------
 | **MPHF** | **Coordinate System - ★ You are here<br><sup>A bijective coordinate system for hashing structured data</sup>**
 | [Kireji](https://github.com/kireji-app/kireji#readme) | [Web Framework<br><sup>A reactive web framework with MPHF routing</sup>](https://github.com/kireji-app/kireji#readme)
-| [Demo](https://github.com/kireji-app/demo#readme) | [App Ecosystem<br><sup>An example app ecosystem demonstrating the project](https://github.com/kireji-app/demo#readme)</sup>
+| [Demo](https://github.com/kireji-app/demo#readme) | [Ecosystem<br><sup>An example ecosystem demonstrating the project](https://github.com/kireji-app/demo#readme)</sup>
 ## Implementation
 The set of all application states **S** is structured as a **combinatorial configuration space**.
 This allows us to locate every configuration as a **point** on a **discrete manifold**.
@@ -59,7 +59,7 @@ const snack = new Mix("snack", [
 console.log(snack.cardinality)
 // 9n
 console.log(snack.hash({ fruit: "apple", drink: "water" }))
-// 6
+// "6"
 console.log(snack.unhash("6"))
 // { fruit: "apple", drink: "water" }
 ```
